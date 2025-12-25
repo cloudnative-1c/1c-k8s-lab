@@ -1,0 +1,27 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default
+  namespace: metallb-system
+spec:
+  addresses:
+  - 172.23.240.100-172.23.240.200
+  avoidBuggyIPs: true
+  autoAssign: true
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: reserved
+  namespace: metallb-system
+spec:
+  addresses:
+  - 172.23.240.5-172.23.240.5
+  avoidBuggyIPs: true
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: kind-l2-advertisement
+  namespace: metallb-system
