@@ -8,7 +8,7 @@ kind create cluster --config kind.yml -n hello-world-1c
 
 ## Загрузка образа в kind
 
-Как создать образ см. в [тут](./02-1c-docker-image).
+Как создать образ см. [тут](../02-1c-docker-image).
 
 ```bash
 kind load docker-image "onec-server:8.3.27.1936" -n hello-world-1c
