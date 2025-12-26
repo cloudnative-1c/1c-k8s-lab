@@ -56,4 +56,33 @@ inet 172.23.0.1/16 brd 172.23.255.255 scope global br-4c5879dd94b7
 kubectl apply -f metallb.yaml
 ```
 
+## cnpg
+
+Установить оператор по [этой](https://cloudnative-pg.io/docs/1.28/installation_upgrade/#directly-using-the-operator-manifest) инструкции из официальной документации.
+
+Применить манифест с кластером postgres:
+
+```bash
+kubectl apply -f cnpg.yaml
+```
+
+Наблюдать за состоянием объектов до тех пор, пока под `cnpg-1` не перейдет в состояние Running.
+
+```bash
+kubectl get all
+```
+
+Вывод должен быть примерно таким:
+
+```plain
+NAME         READY   STATUS    RESTARTS   AGE
+pod/cnpg-1   1/1     Running   0          68s
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/cnpg-r       ClusterIP   10.96.101.158   <none>        5432/TCP   78s
+service/cnpg-ro      ClusterIP   10.96.246.175   <none>        5432/TCP   78s
+service/cnpg-rw      ClusterIP   10.96.80.161    <none>        5432/TCP   78s
+service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP    23h
+```
+
 Продолжение следует!
