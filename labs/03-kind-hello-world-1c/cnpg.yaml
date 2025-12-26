@@ -1,0 +1,13 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg
+spec:
+  instances: 1
+  imageName: segateekb/pg_pro:16
+  postgresUID: 999
+  postgresGID: 1000
+  podSecurityContext:
+    fsGroup: 999
+  storage:
+    size: 1Gi
