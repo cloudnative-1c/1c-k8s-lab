@@ -179,6 +179,7 @@ statefulset.apps/server1c-02   1/1     24h
 Имя хоста необходимо изменить. Для этого требуется удалить текущий кластер и создать новый.
 
 Узнать uuid текущего кластера: `kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster list`.
+
 Удалить кластер: `kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster remove --cluster=<uuid>`.
 
 Добавить кластер с правильным именем хоста:
