@@ -11,3 +11,16 @@ spec:
     fsGroup: 999
   storage:
     size: 1Gi
+  managed:
+    roles:
+    - name: app
+      createdb: true
+      login: true
+      superuser: true
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+      encoding: UTF8
+      locale: ru_RU.UTF-8
+      localeCollate: ru_RU.UTF8

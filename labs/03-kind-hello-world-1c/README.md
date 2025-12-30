@@ -66,7 +66,7 @@ kubectl apply -f metallb.yaml
 kubectl apply -f cnpg.yaml
 ```
 
-Наблюдать за состоянием объектов до тех пор, пока под `cnpg-1` не перейдет в состояние Running.
+Наблюдать за состоянием объектов до тех пор, пока у пода `cnpg-1` в колонке `STATUS` не появится `Running`, а значение в колонке `READY` не станет равным `1/1`.
 
 ```bash
 kubectl get all
@@ -137,5 +137,91 @@ Non-authoritative answer:
 Name:   server1c-01-lb.default.cluster.local
 Address: 172.23.240.100
 ```
+
+## Платформа 1С
+
+Развернуть серверы 1С командой `kubectl apply -f cluster1c.yaml`
+
+> ВАЖНО! Текущий вариант на самом деле разворачивает два разных кластера 1С. Сборка кластера из нескольких серверов будет реализована в следующих лабораторных.
+
+Если все прошло корректно, то команда `kubectl get all` должна иметь такой вывод (список портов сокращен мной вручную для ясности):
+
+```plain
+NAME                READY   STATUS    RESTARTS   AGE
+pod/cnpg-1          1/1     Running   0          47h
+pod/server1c-01-0   1/1     Running   0          24h
+pod/server1c-02-0   1/1     Running   0          24h
+
+NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                                             AGE
+service/cnpg-r           ClusterIP      10.96.101.158   <none>           5432/TCP                                            47h
+service/cnpg-ro          ClusterIP      10.96.246.175   <none>           5432/TCP                                            47h
+service/cnpg-rw          ClusterIP      10.96.80.161    <none>           5432/TCP                                            47h
+service/kubernetes       ClusterIP      10.96.0.1       <none>           443/TCP                                             2d23h
+service/server1c-01      ClusterIP      None            <none>           1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP,5900/TCP   24h
+service/server1c-01-lb   LoadBalancer   10.96.194.182   172.23.240.100   1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP,5900/TCP   24h
+service/server1c-02      ClusterIP      None            <none>           1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP            24h
+service/server1c-02-lb   LoadBalancer   10.96.156.220   172.23.240.101   1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP            24h
+
+NAME                           READY   AGE
+statefulset.apps/server1c-01   1/1     24h
+statefulset.apps/server1c-02   1/1     24h
+```
+
+На что обратить особое внимание:
+
+- все pod-ы должны находиться в состоянии RUNNING
+- у сервисов типа LoadBalancer должен быть заполнен EXTERNAL-IP
+
+## Настройка кластера
+
+Кластер создается автоматически при запуске контейнера, в параметр `agent-host` передается имя хоста. Это же имя хоста будет передано тонкому или толстому клиенту при начале работы с информационной базой. А это соврешенно неправильно, потому что клиент находится снаружи кластера Kubernetes и не может обращаться к узлам кластера 1С по именам хостов.
+
+Имя хоста необходимо изменить. Для этого требуется удалить текущий кластер и создать новый.
+
+Узнать uuid текущего кластера: `kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster list`.
+Удалить кластер: `kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster remove --cluster=<uuid>`.
+
+Добавить кластер с правильным именем хоста:
+
+```bash
+kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster insert --host "server1c-01-lb.default.cluster.local" --port 1541
+```
+
+Запомнить его uuid.
+
+## Информационная база
+
+Создавать информационную базу придется из пода, потому что платформа 1С устроена так, что при интерактивном добавлении новой ИБ хост СУБД должен резолвиться с локального хоста, а развернутый в кластере Kubernetes cloudnative-pg не выставлен наружу (это и не планировалось).
+
+Однако, требуется получить логин и пароль от Postgres. Для этого на локальной машине надо выполнить команды:
+
+```bash
+kubectl get secret cnpg-app -o jsonpath='{.data.user}' | base64 -d
+kubectl get secret cnpg-app -o jsonpath='{.data.password}' | base64 -d
+```
+
+Добавить новую информационную базу с помощью команды ниже.
+
+> ВАЖНО! Необходимо установить параметры `uuid` и `pwd`.
+
+```bash
+kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac infobase create \
+  --cluster=<uuid> \
+  --create-database \
+  --name=cn1c-test \
+  --dbms=PostgreSQL \
+  --db-server=cnpg-rw \
+  --db-name=cn1c-test \
+  --locale=ru \
+  --db-user=app \
+  --db-pwd=<pwd> \
+  --license-distribution=allow \
+  --scheduled-jobs-deny=on
+```
+
+Добавить базу в список баз на локальной машине, параметры ниже:
+
+- Кластер серверов 1С:Предприятия: `server1c-01-lb.default.cluster.local`
+- Имя информационной базы в кластере: `cn1c-test`
 
 Продолжение следует!
