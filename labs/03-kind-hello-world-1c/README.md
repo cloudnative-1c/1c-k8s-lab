@@ -136,9 +136,9 @@ service/cnpg-ro          ClusterIP      10.96.246.175   <none>           5432/TC
 service/cnpg-rw          ClusterIP      10.96.80.161    <none>           5432/TCP                                            47h
 service/kubernetes       ClusterIP      10.96.0.1       <none>           443/TCP                                             2d23h
 service/server1c-01      ClusterIP      None            <none>           1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP,5900/TCP   24h
-service/server1c-01-lb   LoadBalancer   10.96.194.182   172.23.240.100   1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP,5900/TCP   24h
+service/server1c-01-0   LoadBalancer   10.96.194.182   172.23.240.100   1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP,5900/TCP   24h
 service/server1c-02      ClusterIP      None            <none>           1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP            24h
-service/server1c-02-lb   LoadBalancer   10.96.156.220   172.23.240.101   1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP            24h
+service/server1c-02-0   LoadBalancer   10.96.156.220   172.23.240.101   1540/TCP,1541/TCP,1545/TCP,1560-1591/TCP            24h
 
 NAME                           READY   AGE
 statefulset.apps/server1c-01   1/1     24h
@@ -162,12 +162,12 @@ sudo resolvectl dns <interface> 172.23.240.5
 sudo resolvectl domain <interface> '~cluster.local'
 ```
 
-Проверить работоспобность CoreDNS можно командой `nslookup server1c-01-lb.default.cluster.local`.
+Проверить работоспобность CoreDNS можно командой `nslookup server1c-01-0.default.cluster.local`.
 Если все корректно, то в ответе должен быть указан **внешний** IP-адрес LoadBalancer-а:
 
 ```plain
 Non-authoritative answer:
-Name:   server1c-01-lb.default.cluster.local
+Name:   server1c-01-0.default.cluster.local
 Address: 172.23.240.100
 ```
 
@@ -184,7 +184,7 @@ Address: 172.23.240.100
 Добавить кластер с правильным именем хоста:
 
 ```bash
-kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster insert --host "server1c-01-lb.default.cluster.local" --port 1541
+kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster insert --host "server1c-01-0.default.cluster.local" --port 1541
 ```
 
 Запомнить его uuid.
@@ -221,7 +221,37 @@ kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac infobase create \
 
 Добавить базу в список баз на локальной машине, параметры ниже:
 
-- Кластер серверов 1С:Предприятия: `server1c-01-lb.default.cluster.local`
+- Кластер серверов 1С:Предприятия: `server1c-01-0.default.cluster.local`
 - Имя информационной базы в кластере: `cn1c-test`
+
+## Активация comminuty-лицензии 1С
+
+```bash
+kubectl exec -it server1c-01-0 -- /bin/bash
+```
+
+Затем:
+
+```bash
+echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.list
+apt update
+apt install -y libcups2 libgtk-3-0 libwebkit2gtk-4.0-37 libglu1-mesa xvfb x11vnc
+Xvfb :99 -screen 0 1024x768x24 &
+x11vnc -storepasswd "12345678" /etc/vncpasswd
+mkdir -p /var/log/x11vnc
+/usr/bin/x11vnc -rfbport 5900 -display :99 -forever -o /var/log/x11vnc/x11vnc.log -rfbauth /etc/vncpasswd -xkb -ncache 10 -bg -noxrecord -noxfixes -noxdamage -nomodtweak &
+su - usr1cv8
+DISPLAY=:99.0 /opt/1cv8/current/1cv8
+```
+
+Установить на хост клиент VNC
+
+```bash
+apt install -y remmina
+```
+
+Открыть Remmina и подключиться по протоколу `VNC` к `server1c-01-0.default.cluster.local`
+
+Далее необходимо активировать комьюнити-лицензию.
 
 Продолжение следует!

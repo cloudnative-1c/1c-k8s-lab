@@ -2,161 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: server1c-01
-spec:
-  clusterIP: None
-  selector:
-     bind: server1c-01
-  ports:
-    - name: "port-1540"
-      protocol: TCP
-      port: 1540
-      targetPort: 1540
-    - name: "port-1541"
-      protocol: TCP
-      port: 1541
-      targetPort: 1541
-    - name: "port-1545"
-      protocol: TCP
-      port: 1545
-      targetPort: 1545
-    - name: "port-1560"
-      protocol: TCP
-      port: 1560
-      targetPort: 1560
-    - name: "port-1561"
-      protocol: TCP
-      port: 1561
-      targetPort: 1561
-    - name: "port-1562"
-      protocol: TCP
-      port: 1562
-      targetPort: 1562
-    - name: "port-1563"
-      protocol: TCP
-      port: 1563
-      targetPort: 1563
-    - name: "port-1564"
-      protocol: TCP
-      port: 1564
-      targetPort: 1564
-    - name: "port-1565"
-      protocol: TCP
-      port: 1565
-      targetPort: 1565
-    - name: "port-1566"
-      protocol: TCP
-      port: 1566
-      targetPort: 1566
-    - name: "port-1567"
-      protocol: TCP
-      port: 1567
-      targetPort: 1567
-    - name: "port-1568"
-      protocol: TCP
-      port: 1568
-      targetPort: 1568
-    - name: "port-1569"
-      protocol: TCP
-      port: 1569
-      targetPort: 1569
-    - name: "port-1570"
-      protocol: TCP
-      port: 1570
-      targetPort: 1570
-    - name: "port-1571"
-      protocol: TCP
-      port: 1571
-      targetPort: 1571
-    - name: "port-1572"
-      protocol: TCP
-      port: 1572
-      targetPort: 1572
-    - name: "port-1573"
-      protocol: TCP
-      port: 1573
-      targetPort: 1573
-    - name: "port-1574"
-      protocol: TCP
-      port: 1574
-      targetPort: 1574
-    - name: "port-1575"
-      protocol: TCP
-      port: 1575
-      targetPort: 1575
-    - name: "port-1576"
-      protocol: TCP
-      port: 1576
-      targetPort: 1576
-    - name: "port-1577"
-      protocol: TCP
-      port: 1577
-      targetPort: 1577
-    - name: "port-1578"
-      protocol: TCP
-      port: 1578
-      targetPort: 1578
-    - name: "port-1579"
-      protocol: TCP
-      port: 1579
-      targetPort: 1579
-    - name: "port-1580"
-      protocol: TCP
-      port: 1580
-      targetPort: 1580
-    - name: "port-1581"
-      protocol: TCP
-      port: 1581
-      targetPort: 1581
-    - name: "port-1582"
-      protocol: TCP
-      port: 1582
-      targetPort: 1582
-    - name: "port-1583"
-      protocol: TCP
-      port: 1583
-      targetPort: 1583
-    - name: "port-1584"
-      protocol: TCP
-      port: 1584
-      targetPort: 1584
-    - name: "port-1585"
-      protocol: TCP
-      port: 1585
-      targetPort: 1585
-    - name: "port-1586"
-      protocol: TCP
-      port: 1586
-      targetPort: 1586
-    - name: "port-1587"
-      protocol: TCP
-      port: 1587
-      targetPort: 1587
-    - name: "port-1588"
-      protocol: TCP
-      port: 1588
-      targetPort: 1588
-    - name: "port-1589"
-      protocol: TCP
-      port: 1589
-      targetPort: 1589
-    - name: "port-1590"
-      protocol: TCP
-      port: 1590
-      targetPort: 1590
-    - name: "port-1591"
-      protocol: TCP
-      port: 1591
-      targetPort: 1591
-    - name: "port-5900"
-      protocol: TCP
-      port: 5900
-      targetPort: 5900
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: server1c-01-lb
+  name: server1c-01-0
 spec:
   allocateLoadBalancerNodePorts: false
   selector:
@@ -326,10 +172,13 @@ spec:
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-          - "server1c-01-lb.default.cluster.local"
+          - "server1c-01-0.default.cluster.local"
       containers:
       - name: server1c
         image: onec-server:8.3.27.1936
+        volumeMounts:
+        - name: lic
+          mountPath: /opt/1C/licenses/
         ports:
         - containerPort: 1540
         - containerPort: 1541
@@ -367,161 +216,20 @@ spec:
         - containerPort: 1590
         - containerPort: 1591
         - containerPort: 5900
+  volumeClaimTemplates:
+  - metadata:
+      name: lic
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 1Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: server1c-02
-spec:
-  clusterIP: None
-  selector:
-     bind: server1c-02
-  ports:
-    - name: "port-1540"
-      protocol: TCP
-      port: 1540
-      targetPort: 1540
-    - name: "port-1541"
-      protocol: TCP
-      port: 1541
-      targetPort: 1541
-    - name: "port-1545"
-      protocol: TCP
-      port: 1545
-      targetPort: 1545
-    - name: "port-1560"
-      protocol: TCP
-      port: 1560
-      targetPort: 1560
-    - name: "port-1561"
-      protocol: TCP
-      port: 1561
-      targetPort: 1561
-    - name: "port-1562"
-      protocol: TCP
-      port: 1562
-      targetPort: 1562
-    - name: "port-1563"
-      protocol: TCP
-      port: 1563
-      targetPort: 1563
-    - name: "port-1564"
-      protocol: TCP
-      port: 1564
-      targetPort: 1564
-    - name: "port-1565"
-      protocol: TCP
-      port: 1565
-      targetPort: 1565
-    - name: "port-1566"
-      protocol: TCP
-      port: 1566
-      targetPort: 1566
-    - name: "port-1567"
-      protocol: TCP
-      port: 1567
-      targetPort: 1567
-    - name: "port-1568"
-      protocol: TCP
-      port: 1568
-      targetPort: 1568
-    - name: "port-1569"
-      protocol: TCP
-      port: 1569
-      targetPort: 1569
-    - name: "port-1570"
-      protocol: TCP
-      port: 1570
-      targetPort: 1570
-    - name: "port-1571"
-      protocol: TCP
-      port: 1571
-      targetPort: 1571
-    - name: "port-1572"
-      protocol: TCP
-      port: 1572
-      targetPort: 1572
-    - name: "port-1573"
-      protocol: TCP
-      port: 1573
-      targetPort: 1573
-    - name: "port-1574"
-      protocol: TCP
-      port: 1574
-      targetPort: 1574
-    - name: "port-1575"
-      protocol: TCP
-      port: 1575
-      targetPort: 1575
-    - name: "port-1576"
-      protocol: TCP
-      port: 1576
-      targetPort: 1576
-    - name: "port-1577"
-      protocol: TCP
-      port: 1577
-      targetPort: 1577
-    - name: "port-1578"
-      protocol: TCP
-      port: 1578
-      targetPort: 1578
-    - name: "port-1579"
-      protocol: TCP
-      port: 1579
-      targetPort: 1579
-    - name: "port-1580"
-      protocol: TCP
-      port: 1580
-      targetPort: 1580
-    - name: "port-1581"
-      protocol: TCP
-      port: 1581
-      targetPort: 1581
-    - name: "port-1582"
-      protocol: TCP
-      port: 1582
-      targetPort: 1582
-    - name: "port-1583"
-      protocol: TCP
-      port: 1583
-      targetPort: 1583
-    - name: "port-1584"
-      protocol: TCP
-      port: 1584
-      targetPort: 1584
-    - name: "port-1585"
-      protocol: TCP
-      port: 1585
-      targetPort: 1585
-    - name: "port-1586"
-      protocol: TCP
-      port: 1586
-      targetPort: 1586
-    - name: "port-1587"
-      protocol: TCP
-      port: 1587
-      targetPort: 1587
-    - name: "port-1588"
-      protocol: TCP
-      port: 1588
-      targetPort: 1588
-    - name: "port-1589"
-      protocol: TCP
-      port: 1589
-      targetPort: 1589
-    - name: "port-1590"
-      protocol: TCP
-      port: 1590
-      targetPort: 1590
-    - name: "port-1591"
-      protocol: TCP
-      port: 1591
-      targetPort: 1591
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: server1c-02-lb
+  name: server1c-02-0
 spec:
   allocateLoadBalancerNodePorts: false
   selector:
@@ -687,7 +395,7 @@ spec:
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-          - "server1c-02-lb.default.cluster.local"
+          - "server1c-02-0.default.cluster.local"
       containers:
       - name: server1c
         image: onec-server:8.3.27.1936
