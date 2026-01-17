@@ -171,15 +171,42 @@ Name:   server1c-01-0.default.cluster.local
 Address: 172.23.240.100
 ```
 
+ВАЖНО! Эти настройки сбросятся после перезагрузки. Для того, чтобы они действовали постоянно, нужно внести их в netplan:
+
+```yaml
+network:
+  ethernets:
+    br-423f48228513:
+      dhcp4: true
+      nameservers:
+        addresses: [172.23.240.5]
+        search: [~cluster.local]
+      dhcp4-overrides:
+        use-dns: true
+```
+
+После внесения изменений надо выполнить команду `netplan apply`
+
 ## Настройка кластера
 
 Кластер создается автоматически при запуске контейнера, в параметр `agent-host` передается имя хоста. Это же имя хоста будет передано тонкому или толстому клиенту при начале работы с информационной базой. А это соврешенно неправильно, потому что клиент находится снаружи кластера Kubernetes и не может обращаться к узлам кластера 1С по именам хостов.
 
 Имя хоста необходимо изменить. Для этого требуется удалить текущий кластер и создать новый.
 
-Узнать uuid текущего кластера: `kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster list`.
+> Если на локальной машине установлены серверные компоненты платформы, то можно работать через локальный rac, например так:
+> `rac server1c-01-0.default.cluster.local:1545 cluster list`
 
-Удалить кластер: `kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster remove --cluster=<uuid>`.
+Узнать uuid текущего кластера:
+
+```bash
+kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster list
+```
+
+Удалить кластер:
+
+```bash
+kubectl exec -it server1c-01-0 -- /opt/1cv8/current/rac localhost:1545 cluster remove --cluster=<uuid>
+```
 
 Добавить кластер с правильным именем хоста:
 

@@ -177,8 +177,10 @@ spec:
       - name: server1c
         image: onec-server:8.3.27.1936
         volumeMounts:
+        - name: cluster
+          mountPath: /home/usr1cv8/.1cv8
         - name: lic
-          mountPath: /opt/1C/licenses/
+          mountPath: /var/1C/licenses/
         ports:
         - containerPort: 1540
         - containerPort: 1541
@@ -217,6 +219,14 @@ spec:
         - containerPort: 1591
         - containerPort: 5900
   volumeClaimTemplates:
+  - metadata:
+      name: cluster
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 1Gi
   - metadata:
       name: lic
     spec:
@@ -399,6 +409,9 @@ spec:
       containers:
       - name: server1c
         image: onec-server:8.3.27.1936
+        volumeMounts:
+        - name: cluster
+          mountPath: /home/usr1cv8/.1cv8
         ports:
         - containerPort: 1540
         - containerPort: 1541
@@ -435,3 +448,12 @@ spec:
         - containerPort: 1589
         - containerPort: 1590
         - containerPort: 1591
+  volumeClaimTemplates:
+  - metadata:
+      name: cluster
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 1Gi
