@@ -162,7 +162,12 @@ sudo resolvectl dns <interface> 172.23.240.5
 sudo resolvectl domain <interface> '~cluster.local'
 ```
 
-Проверить работоспобность CoreDNS можно командой `nslookup server1c-01-0.default.cluster.local`.
+Проверить работоспобность CoreDNS можно командой:
+
+```
+nslookup server1c-01-0.default.cluster.local
+```
+
 Если все корректно, то в ответе должен быть указан **внешний** IP-адрес LoadBalancer-а:
 
 ```plain
@@ -171,21 +176,27 @@ Name:   server1c-01-0.default.cluster.local
 Address: 172.23.240.100
 ```
 
-ВАЖНО! Эти настройки сбросятся после перезагрузки. Для того, чтобы они действовали постоянно, нужно внести их в netplan:
+ВАЖНО! Чтобы настройки сохранялись после перезагрузки, необходимо создать systemd unit:
 
-```yaml
-network:
-  ethernets:
-    br-423f48228513:
-      dhcp4: true
-      nameservers:
-        addresses: [172.23.240.5]
-        search: [~cluster.local]
-      dhcp4-overrides:
-        use-dns: true
+```
+sudo systemctl edit --force --full kind-dns.service
 ```
 
-После внесения изменений надо выполнить команду `netplan apply`
+```ini
+[Unit]
+Description=Set DNS for kind
+After=network.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/resolvectl dns <interface> 172.23.240.5
+ExecStart=/usr/bin/resolvectl domain <interface> '~cluster.local'
+
+[Install]
+WantedBy=multi-user.target
+```
+
+После сохранения файла надо выполнить команду `sudo systemctl enable kind-dns.service`
 
 ## Настройка кластера
 
